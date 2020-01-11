@@ -82,3 +82,66 @@ solution.solution(2, 2, 2)
 Output:
     7
 """
+
+from collections import Counter
+from fractions import Fraction, gcd
+from math import factorial
+
+
+def solution(w, h, s):
+    sum = 0
+    for c1, m1 in cycle_index(w):
+        for c2, m2 in cycle_index(h):
+            coeff = c1 * c2
+            cycles = combine_cycles(m1, m2)
+
+            sum += coeff * s ** cycles
+    return sum
+
+
+def combine_cycles(m1, m2):
+    sum = 0
+    for l1, n1 in m1:
+        for l2, n2 in m2:
+            sum += n1 * n2 * gcd(l1, l2)
+
+    return sum
+
+
+def cycle_index(n):
+    coeffs = []
+    monos = []
+    for p in partition(n):
+        product = 1
+        mono = Counter(p).items()
+        monos.append(mono)
+
+        for len, cycles in mono:
+            product *= len ** cycles * factorial(cycles)
+
+        coeffs.append(Fraction(1, product))
+
+    return zip(coeffs, monos)
+
+
+def partition(n):
+    a = [0 for i in range(n + 1)]
+    k = 1
+    y = n - 1
+    while k != 0:
+        x = a[k - 1] + 1
+        k -= 1
+        while 2 * x <= y:
+            a[k] = x
+            y -= x
+            k += 1
+        l = k + 1
+        while x <= y:
+            a[k] = x
+            a[l] = y
+            yield a[: k + 2]
+            x += 1
+            y -= 1
+        a[k] = x + y
+        y = x + y - 1
+        yield a[: k + 1]
